@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'RC_Model_KF_vout_for_MCU'.
  *
- * Model version                  : 4.13
+ * Model version                  : 4.14
  * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
- * C/C++ source code generated on : Mon Jun 12 17:14:28 2023
+ * C/C++ source code generated on : Wed Jun 14 13:33:18 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -2206,12 +2206,12 @@ void RC_Model_KF_vout_for_MCU_step(void)
   /* Sum: '<S51>/Add1' incorporates:
    *  Delay: '<S1>/MemoryX'
    *  Inport: '<Root>/current'
-   *  Inport: '<Root>/votlage'
+   *  Inport: '<Root>/voltage'
    *  MATLAB Function: '<Root>/Matrix Generator'
    *  Product: '<S51>/Product'
    *  Product: '<S51>/Product1'
    */
-  yCovSqrt = (rtU.votlage - ((0.0 * rtDW.MemoryX_DSTATE[0] + 0.0 *
+  yCovSqrt = (rtU.voltage - ((0.0 * rtDW.MemoryX_DSTATE[0] + 0.0 *
     rtDW.MemoryX_DSTATE[1]) + rtDW.MemoryX_DSTATE[2])) - 0.0 * rtU.current;
 
   /* Sum: '<S28>/Add' incorporates:
@@ -2237,13 +2237,13 @@ void RC_Model_KF_vout_for_MCU_step(void)
   /* Sum: '<S47>/Sum' incorporates:
    *  Delay: '<S1>/MemoryX'
    *  Inport: '<Root>/current'
-   *  Inport: '<Root>/votlage'
+   *  Inport: '<Root>/voltage'
    *  MATLAB Function: '<Root>/Matrix Generator'
    *  Product: '<S47>/C[k]*xhat[k|k-1]'
    *  Product: '<S47>/D[k]*u[k]'
    *  Sum: '<S47>/Add1'
    */
-  yCovSqrt = rtU.votlage - (((0.0 * rtDW.MemoryX_DSTATE[0] + 0.0 *
+  yCovSqrt = rtU.voltage - (((0.0 * rtDW.MemoryX_DSTATE[0] + 0.0 *
     rtDW.MemoryX_DSTATE[1]) + rtDW.MemoryX_DSTATE[2]) + 0.0 * rtU.current);
 
   /* Product: '<S47>/Product3' */

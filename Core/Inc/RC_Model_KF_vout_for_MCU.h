@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'RC_Model_KF_vout_for_MCU'.
  *
- * Model version                  : 4.13
+ * Model version                  : 4.14
  * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
- * C/C++ source code generated on : Mon Jun 12 17:14:28 2023
+ * C/C++ source code generated on : Wed Jun 14 13:33:18 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -106,7 +106,7 @@ typedef struct {
 /* External inputs (root inport signals with default storage) */
 typedef struct {
   real_T current;                      /* '<Root>/current' */
-  real_T votlage;                      /* '<Root>/votlage' */
+  real_T voltage;                      /* '<Root>/voltage' */
 } ExtU;
 
 /* External outputs (root outports fed by signals with default storage) */

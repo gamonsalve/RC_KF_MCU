@@ -48,10 +48,11 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 uint8_t rx_buffer[1];
 char input_data[10];
-char output_data[100];
+char output_data[50];
 char *token;
 uint32_t start_time = 0;
 uint32_t elapsed_time = 0;
+uint8_t process_data = 0; //Flag to start processing data
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -96,7 +97,7 @@ int main(void) {
 	MX_GPIO_Init();
 	MX_USART2_UART_Init();
 	/* USER CODE BEGIN 2 */
-
+	HAL_UART_Receive_IT(&huart2, rx_buffer, 1);
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -112,31 +113,27 @@ int main(void) {
 	 *
 	 * */
 	while (1) {
-		if (HAL_OK == HAL_UART_Receive(&huart2, rx_buffer, 1, 100)) {
-			if (rx_buffer[0] != '\r') {
-				//Read the byte/char and add it to the data variable if there is no \r
-				strcat(input_data, (char*) rx_buffer);
-			} else {
-				//We get the line terminator, then process the data
-				start_time = HAL_GetTick();
-				if (TESTING){
-					HAL_UART_Transmit(&huart2, (uint8_t*) input_data, 10, 500);
-				}
-				token = strtok(input_data, ";");
-				rtU.current = atof(token);
-				while (token != NULL) {
-					token = strtok(NULL, " ");
-					if (token != NULL) {
-						rtU.votlage = atof(token);
-					}
-				}
-				RC_Model_KF_vout_for_MCU_step();
-				elapsed_time = HAL_GetTick() - start_time;
-				sprintf(output_data, "%ld;%.4f;%.4f\r\n", elapsed_time, rtY.soc_estimated, rtY.voltage_estimated);
-				HAL_UART_Transmit(&huart2, (uint8_t*) output_data, 100, 200);
-				memset(input_data, 0, strlen(input_data)); //clean input data
+		if (process_data == 1) {
+			// UART input data is ready to be processed
+			if (TESTING) {
+				HAL_UART_Transmit(&huart2, (uint8_t*) input_data, 10, 500);
 			}
-
+			start_time = HAL_GetTick();
+			token = strtok(input_data, ";");
+			rtU.current = atof(token);
+			while (token != NULL) {
+				token = strtok(NULL, " ");
+				if (token != NULL) {
+					rtU.voltage = atof(token);
+				}
+			}
+			RC_Model_KF_vout_for_MCU_step();
+			elapsed_time = HAL_GetTick() - start_time;
+			sprintf(output_data, "%ld;%.4f;%.4f;%.4f;%.4f\r", elapsed_time,
+					rtY.soc_estimated, rtY.voltage_estimated, rtU.current, rtU.voltage);
+			process_data = 0; //The input data has been processed
+			HAL_UART_Transmit_IT(&huart2, (uint8_t*) output_data, sizeof(output_data));
+			memset(input_data, 0, strlen(input_data)); //clean input data
 		}
 
 		/* USER CODE END WHILE */
@@ -250,7 +247,21 @@ static void MX_GPIO_Init(void) {
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+	if (rx_buffer[0] != '\r') {
+		// Read the byte/char and add it to the data variable if there is no \r
+		strcat(input_data, (char*) rx_buffer);
+		HAL_UART_Receive_IT(&huart2, rx_buffer, 1); //we are still waiting for more data, we will continuo reading
+	} else {
+		//We get the line terminator, then process the data and send
+		process_data = 1;
+	}
+}
 
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
+	process_data = 0; // the input data has been processed and send
+	HAL_UART_Receive_IT(&huart2, rx_buffer, 1);
+}
 /* USER CODE END 4 */
 
 /**

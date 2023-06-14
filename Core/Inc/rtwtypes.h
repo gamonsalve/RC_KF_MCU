@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'RC_Model_KF_vout_for_MCU'.
  *
- * Model version                  : 4.13
+ * Model version                  : 4.14
  * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
- * C/C++ source code generated on : Mon Jun 12 17:14:28 2023
+ * C/C++ source code generated on : Wed Jun 14 13:33:18 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
