@@ -46,13 +46,14 @@
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-uint8_t rx_buffer[1];
-char input_data[10];
-char output_data[50];
-char *token;
+uint8_t rx_buffer[1]; //UART input byte
+char input_data[50]; // String build byte by byte
+char output_data[50]; // UART output string
+char *token; // Variable for string split
 uint32_t start_time = 0;
 uint32_t elapsed_time = 0;
 uint8_t process_data = 0; //Flag to start processing data
+uint32_t beat = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -102,17 +103,8 @@ int main(void) {
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
-	/*
-	 * For tomorrow:
-	 * Comment Lines
-	 * finish code -> you must be able to send soc_estimation
-	 * Test with terminal
-	 * Test with database
-	 *
-	 *
-	 *
-	 * */
 	while (1) {
+		Heartbeat();
 		if (process_data == 1) {
 			// UART input data is ready to be processed
 			if (TESTING) {
@@ -129,8 +121,7 @@ int main(void) {
 			}
 			RC_Model_KF_vout_for_MCU_step();
 			elapsed_time = HAL_GetTick() - start_time;
-			sprintf(output_data, "%ld;%.4f;%.4f;%.4f;%.4f\r", elapsed_time,
-					rtY.soc_estimated, rtY.voltage_estimated, rtU.current, rtU.voltage);
+			sprintf(output_data, "%ld;%.4f;%.4f;%.4f;%.4f\r", elapsed_time, rtY.soc_estimated, rtY.voltage_estimated, rtU.current, rtU.voltage);
 			process_data = 0; //The input data has been processed
 			HAL_UART_Transmit_IT(&huart2, (uint8_t*) output_data, sizeof(output_data));
 			memset(input_data, 0, strlen(input_data)); //clean input data
@@ -261,6 +252,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
 	process_data = 0; // the input data has been processed and send
 	HAL_UART_Receive_IT(&huart2, rx_buffer, 1);
+}
+
+void Heartbeat(){
+	if (HAL_GetTick() - beat > 500){
+		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
+		beat = HAL_GetTick();
+	}
 }
 /* USER CODE END 4 */
 
